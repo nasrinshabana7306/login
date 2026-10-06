@@ -20,7 +20,7 @@ export async function cleanupAzCLIAccounts(): Promise<void> {
 }
 
 export async function cleanupAzPSAccounts(): Promise<void> {
-    let psPath: string = await io.which(AzPSConstants.PowerShell_CmdName, true);
+    let psPath: string = await AzPSUtils.getPowerShellPath();
     core.debug(`PowerShell path: ${psPath}`);
     core.debug("Importing Azure PowerShell module.");
     AzPSUtils.setPSModulePathForGitHubRunner();

@@ -15,10 +15,20 @@ export class AzPSConstants {
     static readonly DEFAULT_AZ_PATH_ON_LINUX: string = '/usr/share';
     static readonly DEFAULT_AZ_PATH_ON_WINDOWS: string = 'C:\\Modules';
     static readonly AzAccounts: string = "Az.Accounts";
-    static readonly PowerShell_CmdName = "pwsh";
+    static readonly PowerShell_CmdNames: string[] = ["pwsh", "powershell"];
 }
 
 export class AzPSUtils {
+    static async getPowerShellPath(): Promise<string> {
+        for (const candidate of AzPSConstants.PowerShell_CmdNames) {
+            const resolved = await io.which(candidate, false);
+            if (resolved) {
+                return resolved;
+            }
+        }
+
+        throw new Error(`Unable to locate a PowerShell executable. Tried: ${AzPSConstants.PowerShell_CmdNames.join(', ')}`);
+    }
     static async setPSModulePathForGitHubRunner() {
         const runner: string = process.env.RUNNER_OS || os.type();
         switch (runner.toLowerCase()) {
@@ -81,7 +91,7 @@ export class AzPSUtils {
             options.env = { ...process.env, ...extraEnv };
         }
 
-        let psPath: string = await io.which(AzPSConstants.PowerShell_CmdName, true);
+        const psPath: string = await AzPSUtils.getPowerShellPath();
         await exec.exec(`"${psPath}"`, args, options)
         if (commandStdErr) {
             throw new Error('Azure PowerShell login failed with errors.');

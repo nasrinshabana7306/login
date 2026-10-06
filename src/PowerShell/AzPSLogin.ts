@@ -17,7 +17,7 @@ export class AzPSLogin {
         await AzPSUtils.importLatestAzAccounts();
         const { methodName, args, env } = await AzPSScriptBuilder.getAzPSLoginInvocation(this.loginConfig);
         core.info(`Attempting Azure PowerShell login by using ${methodName}...`);
-        core.debug(`Azure PowerShell login invocation: pwsh ${JSON.stringify(args)}`);
+        core.debug(`Azure PowerShell login invocation: ${JSON.stringify(args)}`);
         await AzPSUtils.runPSFile(args, env);
         console.log(`Running Azure PowerShell Login successfully.`);
     }

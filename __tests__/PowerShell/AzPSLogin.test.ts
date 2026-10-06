@@ -1,8 +1,21 @@
 import * as os from 'os';
+import * as childProcess from 'child_process';
 
 import { AzPSLogin } from '../../src/PowerShell/AzPSLogin';
 import { LoginConfig } from '../../src/common/LoginConfig';
 import { AzPSConstants, AzPSUtils } from '../../src/PowerShell/AzPSUtils';
+
+const hasPowerShell = (() => {
+    for (const candidate of AzPSConstants.PowerShell_CmdNames) {
+        try {
+            childProcess.execFileSync(candidate, ['-NoLogo', '-NoProfile', '-Command', '$PSVersionTable'], { stdio: 'ignore' });
+            return true;
+        } catch {
+            // fall through to the next candidate, or skip the PowerShell-dependent tests entirely
+        }
+    }
+    return false;
+})();
 
 let azpsLogin: AzPSLogin;
 jest.setTimeout(30000);
@@ -48,7 +61,9 @@ describe('Testing set module path', () => {
 
 });
 
-describe('Testing runPSScript', () => {
+const runPSScriptDescribe = hasPowerShell ? describe : describe.skip;
+
+runPSScriptDescribe('Testing runPSScript', () => {
     test('Get PowerShell Version', async () => {
         let script = `try {
             $ErrorActionPreference = "Stop"
